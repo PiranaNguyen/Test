@@ -1,0 +1,5 @@
+{
+  "name": "Quản Lý Công Việc",
+  "description": "Một ứng dụng web để quản lý công việc và nhân viên, cho phép phân công, đặt mức độ ưu tiên và theo dõi deadline.",
+  "requestFramePermissions": []
+}

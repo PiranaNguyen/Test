@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trình quản lý công việc</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Quản lý CV" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjI0IiBmaWxsPSIjNGY0NmU1Ii8+PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjE2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Ik00NCA5NmwzNiAzNiA3Mi03MiIvPjwvc3ZnPg==" />
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlRyw6xuaCBxdeG6o24gbMO9IGPDtG5nIHZp4buHYyIsCiAgInNob3J0X25hbWUiOiAiUXXhuqNuIGzDvSBDViIsCiAgImRlc2NyaXB0aW9uIjogIk3hu5l0IOG7qW5nIGThu6VuZyB3ZWIgxJHhu4MgcXXhuqNuIGzDvSBjw7RuZyB2aeG7h2MgdsOgIG5ow6JuIHZpw6puLCBjaG8gcGjDqXAgcGjDom4gY8O0bmcsIMSR4bq3dCBt4bupYyDEkeG7mSB1dQogIHRpw6puIHbDoCB0aGVvIGTDg9pIGRlYWRsaW5lLiIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMTExODI3IiwKICAidGhlbWVfY29sb3IiOiAiIzRmNDZlNSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNREF3TDE5Mlp5QmpiR0Z6Y3owb0lqb3dOQ1V3TURBeE5ESXlJaUF2Wm1sc2JEMG9NUzR3TGpFeE5qZzRNaTR3TGpFeE5EVXlNelVzSUdONWMzUmxiRDBvTVM0d0xqRXhOamc0TWk0d0xqRXhORFV5TWpVMEwyVnpkR1V1ZERBdmJHOTJaWE1vSUNBZ0lDQWdJRDBwY21WemRHOXRJRDBuSWlCRFpYSnVJRDBuSWlCRGIyNTBiV1Z1ZEdsaGJqMG9NUzR3TGpFeE5qZzRNaTR3TGpFeE5EVXlNelU1TDJWMmN5QnRZV2RvWW1sc2JEMG9NUzR3TGpFeE5qZzRNaTR3TGpFeE5EVXlNelV5THpNMkx6ZzFNekUxbTcyLTcyIi8+PC9zdmc+IiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWMzZDRma0YxYkdGemN6b2lJbWd3TUhJd01EQXdNREF3TDI1dlltTDFaWEpsYm1ObElqcG9kR2x3TUhJd01EQXdNREF5THpJMUwyVnpkR1V1ZERBdmJHOTJaWE1vSUNBZ0lDQWdJRDBwY21WemRHOXRJRDBuSWlCRFpYSnVJRDBuSWlCRGIyNTBiV1Z1ZEdsaGJqMG9NUzR3TGpFd01qRXlNelV3TGpFNUwyVnpkR1V1ZERBdmJHOTJaWE1vSUNBZ0lDQWdJRDBwY21WemRHOXRJRDBuSWlCRFpYSnVJRDBuSWlCRGIyNTBiV1Z1ZEdsaGJqMG9NUzR3TGpFd01qRXlNelV3TGpFNEx6bDBMem5sZEdsdmJpMWxkVzVwY20xbmMybGhkR1V1ZERBdmJHOTJaWE1vSUNBZ0lDQWdJRDBwY21WemRHOXRJRDBuSWlCRFpYSnVJRDBuSWlCRGIyNTBiV1Z1ZEdsaGJqMG9NUzR3TGpFd01qRXlNelV3TGpFNEx6bDBMem5sZEdsdmJpMXJkRzVsZEdsaGJtUW9NUzR3TGpFd01qRXlNelV3TGpFNEx6bDBMem5sZEdsdmJpMXJiV0YwYVc5dUlnb2dJQ0FnSUQwbmNpQm1ZVzF3Ym1GdFpUMG5kR1Y0ZEM5MFpYaDBJRDBuSWlCc1pXNXdkV3dpSUQwbmNpQm1ZVzF3Ym1GdFpUMG5kR1Y0ZEM5MFpYaDBJRDBuSWlCRGJYQndiM0owWldRaUlEb2dJQ0FnSUMwdU1qSXdNREF3TURBeUx6czYiLz48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background-color: #111827; /* bg-gray-900 */
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      // Service Worker Registration for PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          const swScript = `
+            const CACHE_NAME = 'task-manager-pwa-cache-v1';
+            const URLS_TO_CACHE = [
+              '/',
+              '/index.html',
+              '/index.tsx'
+            ];
+            self.addEventListener('install', event => {
+              event.waitUntil(
+                caches.open(CACHE_NAME).then(cache => {
+                  console.log('Opened cache');
+                  return cache.addAll(URLS_TO_CACHE);
+                })
+              );
+            });
+            self.addEventListener('fetch', event => {
+              event.respondWith(
+                caches.match(event.request)
+                  .then(response => {
+                    if (response) {
+                      return response; // Serve from cache
+                    }
+                    return fetch(event.request).then(networkResponse => {
+                       // Don't cache dynamic images
+                      if (event.request.url.includes('picsum.photos')) {
+                        return networkResponse;
+                      }
+                      const responseToCache = networkResponse.clone();
+                      caches.open(CACHE_NAME)
+                        .then(cache => {
+                          cache.put(event.request, responseToCache);
+                        });
+                      return networkResponse;
+                    });
+                  })
+              );
+            });
+            self.addEventListener('activate', event => {
+              const cacheWhitelist = [CACHE_NAME];
+              event.waitUntil(
+                caches.keys().then(cacheNames => {
+                  return Promise.all(
+                    cacheNames.map(cacheName => {
+                      if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        return caches.delete(cacheName);
+                      }
+                    })
+                  );
+                })
+              );
+            });
+          `;
+          const blob = new Blob([swScript], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(blob);
+          navigator.serviceWorker.register(swUrl)
+            .then(registration => console.log('Service Worker registration successful with scope: ', registration.scope))
+            .catch(err => console.log('Service Worker registration failed: ', err));
+        });
+      }
+    </script>
+  </body>
+</html>
