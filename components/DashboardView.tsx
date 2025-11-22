@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Task, Employee, Project, TaskDifficulty, TaskStatus, KPI, OKR, Timeframe } from '../types';
 import { DIFFICULTY_STYLES, STATUS_STYLES } from '../constants';
@@ -324,6 +325,56 @@ const DashboardView: React.FC<DashboardViewProps> = ({ tasks, employees, project
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2.5">
                     <div className="bg-teal-500 h-2.5 rounded-full" style={{width: `${projectStats.avgOkrProgress}%`}}></div>
+                </div>
+            </div>
+        </div>
+        
+        {/* DETAIL LISTS ADDED HERE AS REQUESTED */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <h4 className="font-bold text-white mb-3 flex items-center gap-2">
+                    <TrendingUpIcon className="w-4 h-4 text-indigo-400" /> Danh sách KPI Nổi bật
+                </h4>
+                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    {kpisInView.length > 0 ? kpisInView.slice(0, 5).map(kpi => {
+                        const progress = calculateKpiProgress(kpi, tasks);
+                        const percentage = kpi.target > 0 ? Math.min(Math.round((progress / kpi.target) * 100), 100) : 0;
+                        return (
+                            <div key={kpi.id} className="bg-gray-900/40 p-2.5 rounded border border-gray-700/50">
+                                <div className="flex justify-between items-start mb-1">
+                                    <p className="text-sm text-gray-200 font-medium line-clamp-1" title={kpi.title}>{kpi.title}</p>
+                                    <span className={`text-xs font-bold ${percentage >= 100 ? 'text-green-400' : 'text-indigo-400'}`}>{progress}/{kpi.target}</span>
+                                </div>
+                                <div className="w-full bg-gray-700 rounded-full h-1.5">
+                                    <div className={`h-1.5 rounded-full ${percentage >= 100 ? 'bg-green-500' : 'bg-indigo-500'}`} style={{width: `${percentage}%`}}></div>
+                                </div>
+                                <p className="text-[10px] text-gray-500 mt-1 text-right">NV: {employeesMap.get(kpi.employeeId)?.name}</p>
+                            </div>
+                        );
+                    }) : <p className="text-sm text-gray-500 italic">Không có KPI nào trong khoảng thời gian này.</p>}
+                </div>
+            </div>
+
+             <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <h4 className="font-bold text-white mb-3 flex items-center gap-2">
+                    <CheckBadgeIcon className="w-4 h-4 text-teal-400" /> Danh sách OKR Nổi bật
+                </h4>
+                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    {okrsInView.length > 0 ? okrsInView.slice(0, 5).map(okr => {
+                        const avgProgress = okr.keyResults.length > 0 ? Math.round(okr.keyResults.reduce((sum, kr) => sum + kr.progress, 0) / okr.keyResults.length) : 0;
+                        return (
+                            <div key={okr.id} className="bg-gray-900/40 p-2.5 rounded border border-gray-700/50">
+                                <div className="flex justify-between items-start mb-1">
+                                    <p className="text-sm text-gray-200 font-medium line-clamp-1" title={okr.objective}>{okr.objective}</p>
+                                    <span className={`text-xs font-bold ${avgProgress >= 100 ? 'text-green-400' : 'text-teal-400'}`}>{avgProgress}%</span>
+                                </div>
+                                <div className="w-full bg-gray-700 rounded-full h-1.5">
+                                    <div className={`h-1.5 rounded-full ${avgProgress >= 100 ? 'bg-green-500' : 'bg-teal-500'}`} style={{width: `${avgProgress}%`}}></div>
+                                </div>
+                                 <p className="text-[10px] text-gray-500 mt-1 text-right">NV: {employeesMap.get(okr.employeeId)?.name}</p>
+                            </div>
+                        );
+                    }) : <p className="text-sm text-gray-500 italic">Không có OKR nào trong khoảng thời gian này.</p>}
                 </div>
             </div>
         </div>

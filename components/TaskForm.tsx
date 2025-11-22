@@ -149,15 +149,24 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, onCancel, onAddComment, e
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
                 <label htmlFor="title" className={formLabelClass}>Tiêu đề {taskToEdit && <span className="text-gray-400 font-mono">(#{taskToEdit.sequenceId})</span>}</label>
-                <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} className={formInputClass} required disabled={isReadOnly} />
+                {/* FIX: Explicitly type event object */}
+                <input type="text" id="title" value={title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)} className={formInputClass} required disabled={isReadOnly} />
             </div>
             <div>
                 <label htmlFor="description" className={formLabelClass}>Mô tả</label>
-                <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className={formInputClass} rows={3} disabled={isReadOnly}></textarea>
+                {/* FIX: Explicitly type event object */}
+                <textarea id="description" value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} className={formInputClass} rows={3} disabled={isReadOnly}></textarea>
             </div>
             <div>
                 <label htmlFor="assignee" className={formLabelClass}>Giao cho</label>
-                <select id="assignee" multiple value={assigneeIds} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAssigneeIds(Array.from(e.target.selectedOptions, option => option.value))} className={`${formInputClass} h-24`} disabled={isReadOnly}>
+                <select 
+                    id="assignee" 
+                    multiple 
+                    value={assigneeIds} 
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAssigneeIds(Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value))} 
+                    className={`${formInputClass} h-24`} 
+                    disabled={isReadOnly}
+                >
                     {employees.map(emp => (
                         <option key={emp.id} value={emp.id}>{emp.name}</option>
                     ))}
@@ -165,20 +174,24 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, onCancel, onAddComment, e
             </div>
              <div>
                 <label htmlFor="notes" className={formLabelClass}>Ghi chú</label>
-                <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={formInputClass} rows={2} placeholder="Thêm ghi chú chi tiết..." disabled={isReadOnly}></textarea>
+                {/* FIX: Explicitly type event object */}
+                <textarea id="notes" value={notes} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)} className={formInputClass} rows={2} placeholder="Thêm ghi chú chi tiết..." disabled={isReadOnly}></textarea>
             </div>
              <div>
                 <label htmlFor="tags" className={formLabelClass}>Thẻ (cách nhau bởi dấu phẩy)</label>
-                <input type="text" id="tags" value={tags} onChange={(e) => setTags(e.target.value)} className={formInputClass} placeholder="VD: Frontend, Bug, Feature" disabled={isReadOnly} />
+                {/* FIX: Explicitly type event object */}
+                <input type="text" id="tags" value={tags} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTags(e.target.value)} className={formInputClass} placeholder="VD: Frontend, Bug, Feature" disabled={isReadOnly} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label htmlFor="startDate" className={formLabelClass}>Ngày bắt đầu</label>
-                    <input type="date" id="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={formInputClass} required disabled={isReadOnly} />
+                    {/* FIX: Explicitly type event object */}
+                    <input type="date" id="startDate" value={startDate} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)} className={formInputClass} required disabled={isReadOnly} />
                 </div>
                 <div>
                     <label htmlFor="deadline" className={formLabelClass}>Deadline</label>
-                    <input type="date" id="deadline" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={formInputClass} required disabled={isReadOnly} />
+                    {/* FIX: Explicitly type event object */}
+                    <input type="date" id="deadline" value={deadline} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeadline(e.target.value)} className={formInputClass} required disabled={isReadOnly} />
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -221,8 +234,10 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, onCancel, onAddComment, e
                         ))}
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2">
-                        <input type="text" value={newAttachmentName} onChange={e => setNewAttachmentName(e.target.value)} placeholder="Tên tệp" className={`${formInputClass} sm:flex-1`}/>
-                        <input type="url" value={newAttachmentUrl} onChange={e => setNewAttachmentUrl(e.target.value)} placeholder="URL tệp" className={`${formInputClass} sm:flex-1`}/>
+                        {/* FIX: Explicitly type event object */}
+                        <input type="text" value={newAttachmentName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewAttachmentName(e.target.value)} placeholder="Tên tệp" className={`${formInputClass} sm:flex-1`}/>
+                        {/* FIX: Explicitly type event object */}
+                        <input type="url" value={newAttachmentUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewAttachmentUrl(e.target.value)} placeholder="URL tệp" className={`${formInputClass} sm:flex-1`}/>
                         <button type="button" onClick={handleAddAttachment} className="px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-500 transition flex items-center justify-center gap-1">
                             <PlusIcon className="w-5 h-5" /> <span className="sm:hidden">Thêm</span>
                         </button>
@@ -271,7 +286,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, onCancel, onAddComment, e
                       }) : <p className="text-gray-400 text-sm italic text-center">Chưa có bình luận nào.</p>}
                   </div>
                   <div className="space-y-2">
-                       <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder={`Bình luận với tư cách ${currentUser.name}...`} className={formInputClass} rows={2} aria-label="Nội dung bình luận"></textarea>
+                       {/* FIX: Explicitly type event object */}
+                       <textarea value={newComment} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewComment(e.target.value)} placeholder={`Bình luận với tư cách ${currentUser.name}...`} className={formInputClass} rows={2} aria-label="Nội dung bình luận"></textarea>
                       <button onClick={handleAddComment} className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition font-semibold">Gửi bình luận</button>
                   </div>
               </div>

@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Task, Employee, TaskStatus, Comment, Project, Priority, UserRole, Notification, ActivityLog, TaskDifficulty, KPI, OKR, KeyResult, Timeframe } from './types';
 import { INITIAL_TASKS, INITIAL_EMPLOYEES, STATUS_STYLES, INITIAL_PROJECTS } from './constants';
@@ -64,11 +63,11 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date('2025-11-01')); // Start in Nov 2025 for demo
   
   const [currentTimeframe, setCurrentTimeframe] = useState<Timeframe>({
-    period: 'month',
-    date: '2025-08-01'
+    period: 'quarter',
+    date: '2025-11-01' // Start in Q4 2025 for demo
   });
 
   const [cardDisplaySettings, setCardDisplaySettings] = useState({
@@ -142,11 +141,17 @@ const App: React.FC = () => {
   }, [tasksForActiveProject, filterAssigneeId, searchQuery]);
 
   const groupedTasks = useMemo(() => {
-    const grouped = filteredTasks.reduce((acc, task) => {
-      if (!acc[task.status]) acc[task.status] = [];
+    const grouped = filteredTasks.reduce((acc: Record<TaskStatus, Task[]>, task) => {
+      if (!acc[task.status]) {
+        acc[task.status] = [];
+      }
       acc[task.status].push(task);
       return acc;
-    }, {} as Record<TaskStatus, Task[]>);
+    }, {
+        [TaskStatus.TODO]: [],
+        [TaskStatus.IN_PROGRESS]: [],
+        [TaskStatus.DONE]: [],
+    });
 
     for (const status in grouped) {
         grouped[status as TaskStatus].sort((a, b) => {
@@ -486,14 +491,141 @@ const App: React.FC = () => {
       }));
   };
 
+  const handleGenerateSampleKpis = () => {
+    if (!activeProjectId || !currentUser) return;
+    
+    // Demo KPIs specifically for Web Design (5 KPIs)
+    // We distribute them among the first few employees or current user for demo purposes
+    const demoEmployees = employees.slice(0, 3); // Use first 3 employees
+    const getRandomEmployeeId = () => demoEmployees[Math.floor(Math.random() * demoEmployees.length)].id;
+
+    const newKpis: KPI[] = [
+        {
+            id: `kpi-${Date.now()}-1`,
+            employeeId: getRandomEmployeeId(),
+            projectId: activeProjectId,
+            title: 'Hoàn thiện 100% Wireframe & Mockup trang chủ',
+            target: 1,
+            timeframe: currentTimeframe
+        },
+        {
+            id: `kpi-${Date.now()}-2`,
+            employeeId: getRandomEmployeeId(),
+            projectId: activeProjectId,
+            title: 'Thiết kế UI cho 5 trang con (About, Services, Contact, Blog, FAQ)',
+            target: 5,
+            timeframe: currentTimeframe
+        },
+        {
+            id: `kpi-${Date.now()}-3`,
+            employeeId: getRandomEmployeeId(),
+            projectId: activeProjectId,
+            title: 'Thực hiện 3 buổi Usability Testing với người dùng thật',
+            target: 3,
+            timeframe: currentTimeframe
+        },
+        {
+            id: `kpi-${Date.now()}-4`,
+            employeeId: getRandomEmployeeId(),
+            projectId: activeProjectId,
+            title: 'Xây dựng bộ Style Guide (Màu sắc, Typography, Grid)',
+            target: 1,
+            timeframe: currentTimeframe
+        },
+        {
+            id: `kpi-${Date.now()}-5`,
+            employeeId: getRandomEmployeeId(),
+            projectId: activeProjectId,
+            title: 'Review và Approve 100% thiết kế Mobile Responsive',
+            target: 1,
+            timeframe: currentTimeframe
+        }
+    ];
+
+    setProjects(prev => prev.map(p => {
+        if (p.id !== activeProjectId) return p;
+        return { ...p, kpis: [...(p.kpis || []), ...newKpis] };
+    }));
+  };
+
+  const handleGenerateSampleOkrs = () => {
+      if (!activeProjectId || !currentUser) return;
+
+      const demoEmployees = employees.slice(0, 3);
+      const getRandomEmployeeId = () => demoEmployees[Math.floor(Math.random() * demoEmployees.length)].id;
+
+      const newOkrs: OKR[] = [
+          {
+              id: `okr-${Date.now()}-1`,
+              employeeId: getRandomEmployeeId(),
+              projectId: activeProjectId,
+              objective: 'Cải thiện Trải nghiệm Người dùng (UX) toàn diện',
+              keyResults: [
+                  { id: `kr-${Date.now()}-1-1`, title: 'Giảm tỷ lệ thoát (Bounce Rate) trên bản thiết kế mẫu xuống dưới 40%', progress: 30 },
+                  { id: `kr-${Date.now()}-1-2`, title: 'Đạt điểm hài lòng 4.5/5 trong các buổi test nội bộ', progress: 60 },
+                  { id: `kr-${Date.now()}-1-3`, title: 'Hoàn thành luồng người dùng (User Flow) cho 5 tính năng chính', progress: 80 }
+              ],
+              timeframe: currentTimeframe
+          },
+          {
+              id: `okr-${Date.now()}-2`,
+              employeeId: getRandomEmployeeId(),
+              projectId: activeProjectId,
+              objective: 'Xây dựng Hệ thống Thiết kế (Design System) chuẩn mực',
+              keyResults: [
+                  { id: `kr-${Date.now()}-2-1`, title: 'Hoàn thiện thư viện Component với đầy đủ trạng thái (Hover, Active, Disabled)', progress: 50 },
+                  { id: `kr-${Date.now()}-2-2`, title: 'Đồng bộ hóa token màu sắc và font chữ cho cả Web và Mobile App', progress: 20 }
+              ],
+              timeframe: currentTimeframe
+          },
+          {
+              id: `okr-${Date.now()}-3`,
+              employeeId: getRandomEmployeeId(),
+              projectId: activeProjectId,
+              objective: 'Tối ưu hóa Giao diện cho Tốc độ và Hiệu suất',
+              keyResults: [
+                  { id: `kr-${Date.now()}-3-1`, title: 'Giảm dung lượng trung bình của assets hình ảnh xuống dưới 200KB', progress: 90 },
+                  { id: `kr-${Date.now()}-3-2`, title: 'Thiết kế đạt điểm 90+ trên công cụ giả lập Lighthouse về layout shift (CLS)', progress: 75 }
+              ],
+              timeframe: currentTimeframe
+          },
+          {
+              id: `okr-${Date.now()}-4`,
+              employeeId: getRandomEmployeeId(),
+              projectId: activeProjectId,
+              objective: 'Đảm bảo tính Khả dụng (Accessibility) và Bao trùm',
+              keyResults: [
+                  { id: `kr-${Date.now()}-4-1`, title: 'Đạt chuẩn WCAG 2.1 level AA cho toàn bộ màu sắc và độ tương phản', progress: 40 },
+                  { id: `kr-${Date.now()}-4-2`, title: 'Thiết kế đầy đủ trạng thái focus cho điều hướng bằng bàn phím', progress: 10 }
+              ],
+              timeframe: currentTimeframe
+          },
+          {
+              id: `okr-${Date.now()}-5`,
+              employeeId: getRandomEmployeeId(),
+              projectId: activeProjectId,
+              objective: 'Nâng cao Nhận diện Thương hiệu qua Giao diện Web',
+              keyResults: [
+                  { id: `kr-${Date.now()}-5-1`, title: 'Áp dụng ngôn ngữ thiết kế mới vào 100% các trang chính', progress: 10 },
+                  { id: `kr-${Date.now()}-5-2`, title: 'Tăng sự đồng nhất về branding giữa Marketing Site và Web App lên 100%', progress: 5 }
+              ],
+              timeframe: currentTimeframe
+          }
+      ];
+
+      setProjects(prev => prev.map(p => {
+          if (p.id !== activeProjectId) return p;
+          return { ...p, okrs: [...(p.okrs || []), ...newOkrs] };
+      }));
+  };
+
   const statusIcons: { [key in TaskStatus]: React.ReactNode } = {
     [TaskStatus.TODO]: <ClipboardDocumentListIcon className="w-6 h-6" />,
     [TaskStatus.IN_PROGRESS]: <ClockIcon className="w-6 h-6" />,
     [TaskStatus.DONE]: <CheckCircleIcon className="w-6 h-6" />,
   };
   
-  // FIX: Changed title prop from string to TaskStatus to match the type being passed.
-  const KanbanColumn = ({ title, tasks, status }: { title: TaskStatus, tasks: Task[], status: TaskStatus }) => {
+  const KanbanColumn: React.FC<{ title: TaskStatus, tasks: Task[], status: TaskStatus }> = ({ title, tasks, status }) => {
     const { border, text, bg } = STATUS_STYLES[status];
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -679,39 +811,57 @@ const App: React.FC = () => {
                                 </>
                             )}
                         </div>
-                        
-                         {viewMode !== 'dashboard' && viewMode !== 'performance' && (
-                            <button onClick={() => setFilterModalOpen(true)} className="md:hidden flex items-center gap-2 px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition">
-                                <AdjustmentsHorizontalIcon className="w-5 h-5"/>
-                                <span className="text-sm">Tùy chọn</span>
-                            </button>
-                         )}
-                        
-                        <button onClick={handleOpenNewTaskModal} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition">
-                            <PlusIcon className="w-5 h-5"/> 
-                            <span className="hidden sm:inline">Thêm mới</span>
+                        {/* Mobile Filter Button */}
+                        <button onClick={() => setFilterModalOpen(true)} className="md:hidden p-2 bg-gray-700 rounded-md hover:bg-gray-600 transition">
+                            <AdjustmentsHorizontalIcon />
+                        </button>
+                        <button onClick={handleOpenNewTaskModal} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition font-semibold shadow-lg hover:shadow-indigo-500/30">
+                            <PlusIcon className="w-5 h-5"/> <span>Thêm công việc</span>
                         </button>
                     </div>
                 </div>
 
-                {viewMode === 'kanban' ? (
-                    <div className="flex gap-6 overflow-x-auto pb-4 -mb-4 snap-x snap-mandatory">
-                        {(Object.values(TaskStatus) as TaskStatus[]).map(status => (
-                            <KanbanColumn key={status} title={status} tasks={groupedTasks[status] || []} status={status} />
+                 {/* Mobile Filters Modal */}
+                <Modal isOpen={isFilterModalOpen} onClose={() => setFilterModalOpen(false)} title="Bộ lọc & Chế độ xem">
+                    <div className="space-y-4">
+                       <FilterControls />
+                       <button onClick={() => setFilterModalOpen(false)} className="w-full py-2 bg-indigo-600 text-white rounded-md mt-4">Đóng</button>
+                    </div>
+                </Modal>
+                
+                {viewMode === 'kanban' && (
+                     <div className="flex overflow-x-auto pb-4 gap-6 snap-x snap-mandatory">
+                        {Object.values(TaskStatus).map(status => (
+                            <KanbanColumn key={status} title={status} status={status} tasks={groupedTasks[status]} />
                         ))}
                     </div>
-                ) : viewMode === 'calendar' ? (
-                    <CalendarView tasks={filteredTasks} currentDate={currentDate} onDateChange={setCurrentDate} onTaskClick={handleOpenTaskDetailsModal} />
-                ) : viewMode === 'gantt' ? (
-                    <GanttChartView tasks={filteredTasks} employeesMap={employeesMap} currentDate={currentDate} onDateChange={setCurrentDate} onTaskClick={handleOpenTaskDetailsModal} />
-                ) : viewMode === 'dashboard' ? (
-                    <DashboardView 
-                        tasks={tasksForActiveProject} 
-                        employees={employees}
-                        project={activeProject}
-                     />
-                ) : (
-                    <PerformanceView
+                )}
+
+                {viewMode === 'calendar' && (
+                    <CalendarView 
+                        tasks={filteredTasks} 
+                        currentDate={currentDate}
+                        onDateChange={setCurrentDate}
+                        onTaskClick={handleOpenTaskDetailsModal}
+                    />
+                )}
+
+                {viewMode === 'gantt' && (
+                    <GanttChartView 
+                        tasks={filteredTasks}
+                        employeesMap={employeesMap}
+                        currentDate={currentDate}
+                        onDateChange={setCurrentDate}
+                        onTaskClick={handleOpenTaskDetailsModal}
+                    />
+                )}
+
+                {viewMode === 'dashboard' && (
+                    <DashboardView tasks={tasks} employees={employees} project={activeProject} />
+                )}
+
+                 {viewMode === 'performance' && (
+                    <PerformanceView 
                         project={activeProject}
                         employees={employees}
                         tasks={tasks}
@@ -725,72 +875,104 @@ const App: React.FC = () => {
                         onDeleteOkr={handleDeleteOkr}
                         onAddOkr={() => { setOkrToEdit(null); setOkrModalOpen(true); }}
                         onUpdateKeyResultProgress={handleUpdateKeyResultProgress}
+                        onGenerateSampleKpis={handleGenerateSampleKpis}
+                        onGenerateSampleOkrs={handleGenerateSampleOkrs}
                     />
                 )}
+
             </section>
-            
-            {currentUser.role === UserRole.ADMIN && (
-                <section id="employees">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-white">Quản lý nhân viên</h2>
-                    <button onClick={handleOpenNewEmployeeModal} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition">
-                      <PlusIcon className="w-5 h-5"/> <span className="hidden sm:inline">Thêm nhân viên</span>
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {employees.map(emp => (
-                      <EmployeeCard key={emp.id} employee={emp} currentUser={currentUser} onEdit={handleOpenEditEmployeeModal} onDelete={handleDeleteEmployee} />
-                    ))}
-                  </div>
-                </section>
+
+             {/* Employees Section (Only visible to Admin in Kanban mode for management) */}
+            {currentUser.role === UserRole.ADMIN && viewMode === 'kanban' && (
+                <>
+                    <div className="border-t border-gray-700 my-8"></div>
+                    <section id="employees">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-white">Nhân viên</h2>
+                            <button onClick={handleOpenNewEmployeeModal} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition font-semibold shadow-lg hover:shadow-green-500/30">
+                                <PlusIcon className="w-5 h-5"/> <span>Thêm nhân viên</span>
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {employees.map(emp => (
+                                <EmployeeCard 
+                                    key={emp.id} 
+                                    employee={emp} 
+                                    currentUser={currentUser}
+                                    onEdit={handleOpenEditEmployeeModal} 
+                                    onDelete={handleDeleteEmployee} 
+                                />
+                            ))}
+                        </div>
+                    </section>
+                </>
             )}
           </>
         ) : (
-            <div className="text-center py-16 bg-gray-800 rounded-lg">
-                <h3 className="text-xl font-semibold text-white">Chào mừng bạn!</h3>
-                <p className="text-gray-400 mt-2">Vui lòng chọn một dự án để bắt đầu, hoặc tạo một dự án mới.</p>
-            </div>
+           <div className="text-center py-20">
+               <h3 className="text-xl text-gray-400 mb-4">Chưa có dự án nào được chọn hoặc tạo.</h3>
+               {currentUser.role === UserRole.ADMIN && (
+                   <button onClick={() => { setProjectToEdit(null); setProjectModalOpen(true); }} className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition font-bold">
+                       Tạo dự án đầu tiên
+                   </button>
+               )}
+           </div>
         )}
       </main>
 
-      <Modal isOpen={isTaskModalOpen} onClose={() => setTaskModalOpen(false)} title={taskToEdit ? 'Chi tiết công việc' : 'Tạo công việc mới'}>
-        <TaskForm onSubmit={handleTaskFormSubmit} onCancel={() => setTaskModalOpen(false)} onAddComment={handleAddComment} employees={employees} taskToEdit={taskToEdit} currentUser={currentUser} />
+      {/* Modals */}
+      <Modal isOpen={isTaskModalOpen} onClose={() => setTaskModalOpen(false)} title={taskToEdit ? "Chỉnh sửa công việc" : "Thêm công việc mới"}>
+        <TaskForm 
+            onSubmit={handleTaskFormSubmit} 
+            onCancel={() => setTaskModalOpen(false)} 
+            onAddComment={handleAddComment}
+            employees={employees}
+            taskToEdit={taskToEdit}
+            currentUser={currentUser}
+        />
       </Modal>
 
-      <Modal isOpen={isEmployeeModalOpen} onClose={() => setEmployeeModalOpen(false)} title={employeeToEdit ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}>
-        <EmployeeForm onSubmit={handleEmployeeFormSubmit} onCancel={() => setEmployeeModalOpen(false)} employeeToEdit={employeeToEdit} />
-      </Modal>
-
-      <Modal isOpen={isProjectModalOpen} onClose={() => setProjectModalOpen(false)} title={projectToEdit ? 'Chi tiết dự án' : 'Tạo dự án mới'}>
-          <ProjectForm onSubmit={handleProjectFormSubmit} onCancel={() => setProjectModalOpen(false)} projectToEdit={projectToEdit} employees={employees} />
+      <Modal isOpen={isEmployeeModalOpen} onClose={() => setEmployeeModalOpen(false)} title={employeeToEdit ? "Chỉnh sửa nhân viên" : "Thêm nhân viên mới"}>
+        <EmployeeForm 
+            onSubmit={handleEmployeeFormSubmit} 
+            onCancel={() => setEmployeeModalOpen(false)} 
+            employeeToEdit={employeeToEdit} 
+        />
       </Modal>
       
-      <Modal isOpen={isKpiModalOpen} onClose={() => { setKpiModalOpen(false); setKpiToEdit(null); }} title={kpiToEdit ? 'Chỉnh sửa KPI' : 'Tạo KPI mới'}>
-          <KpiForm 
-            onSubmit={handleKpiFormSubmit}
-            onCancel={() => { setKpiModalOpen(false); setKpiToEdit(null); }}
-            kpiToEdit={kpiToEdit}
-            employees={employees.filter(e => e.role === UserRole.MEMBER)}
-            projectId={activeProjectId!}
-            timeframe={kpiToEdit?.timeframe || currentTimeframe}
-          />
+      <Modal isOpen={isProjectModalOpen} onClose={() => setProjectModalOpen(false)} title={projectToEdit ? "Cập nhật dự án" : "Tạo dự án mới"}>
+        <ProjectForm 
+            onSubmit={handleProjectFormSubmit} 
+            onCancel={() => setProjectModalOpen(false)}
+            projectToEdit={projectToEdit}
+            employees={employees}
+        />
       </Modal>
 
-       <Modal isOpen={isOkrModalOpen} onClose={() => { setOkrModalOpen(false); setOkrToEdit(null); }} title={okrToEdit ? 'Chỉnh sửa OKR' : 'Tạo OKR mới'}>
-          <OkrForm 
-            onSubmit={handleOkrFormSubmit}
-            onCancel={() => { setOkrModalOpen(false); setOkrToEdit(null); }}
-            okrToEdit={okrToEdit}
-            employeeId={currentUser.id}
-            projectId={activeProjectId!}
-            timeframe={okrToEdit?.timeframe || currentTimeframe}
-          />
+      <Modal isOpen={isKpiModalOpen} onClose={() => setKpiModalOpen(false)} title={kpiToEdit ? "Cập nhật KPI" : "Tạo KPI Mới"}>
+          {activeProjectId && (
+            <KpiForm
+                onSubmit={handleKpiFormSubmit}
+                onCancel={() => setKpiModalOpen(false)}
+                kpiToEdit={kpiToEdit}
+                employees={employees}
+                projectId={activeProjectId}
+                timeframe={currentTimeframe}
+            />
+          )}
       </Modal>
 
-      <Modal isOpen={isFilterModalOpen} onClose={() => setFilterModalOpen(false)} title="Bộ lọc & Tùy chọn">
-          <div className="flex flex-col gap-4">
-              <FilterControls />
-          </div>
+      <Modal isOpen={isOkrModalOpen} onClose={() => setOkrModalOpen(false)} title={okrToEdit ? "Cập nhật OKR" : "Thiết lập OKR"}>
+          {activeProjectId && (
+            <OkrForm
+                onSubmit={handleOkrFormSubmit}
+                onCancel={() => setOkrModalOpen(false)}
+                okrToEdit={okrToEdit}
+                employeeId={currentUser.id}
+                projectId={activeProjectId}
+                timeframe={currentTimeframe}
+            />
+          )}
       </Modal>
 
     </div>

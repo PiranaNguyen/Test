@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { OKR, KeyResult, Timeframe } from '../types';
-import { PlusIcon, TrashIcon } from './icons';
+import { PlusIcon, TrashIcon, CheckBadgeIcon } from './icons';
 
 interface OkrFormProps {
     onSubmit: (okr: Omit<OKR, 'id'>) => void;
@@ -18,10 +19,11 @@ const OkrForm: React.FC<OkrFormProps> = ({ onSubmit, onCancel, okrToEdit, employ
     useEffect(() => {
         if (okrToEdit) {
             setObjective(okrToEdit.objective);
-            setKeyResults(okrToEdit.keyResults.map(({ id, progress, ...rest }) => rest));
+            // Load existing KRs without ID/Progress for editing text, preserve ID on submit
+            setKeyResults(okrToEdit.keyResults.map(({ title }) => ({ title })));
         } else {
             setObjective('');
-            setKeyResults([{ title: '' }]);
+            setKeyResults([{ title: '' }, { title: '' }]); // Default 2 empty KRs
         }
     }, [okrToEdit]);
     
@@ -44,16 +46,32 @@ const OkrForm: React.FC<OkrFormProps> = ({ onSubmit, onCancel, okrToEdit, employ
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        // Filter out empty KRs
         const validKeyResults = keyResults.filter(kr => kr.title.trim() !== '');
-        if (!objective.trim() || validKeyResults.length === 0) {
-            alert("Vui lòng nhập Mục tiêu và ít nhất một Kết quả chính.");
+        
+        if (!objective.trim()) {
+            alert("Vui lòng nhập Mục tiêu (Objective).");
             return;
         }
+        
+        if (validKeyResults.length === 0) {
+             alert("Vui lòng nhập ít nhất một Kết quả chính (Key Result).");
+             return;
+        }
 
+        // Reconstruct Key Results preserving IDs and Progress if editing
         const finalKeyResults: KeyResult[] = validKeyResults.map((kr, index) => {
-            const existingKr = okrToEdit?.keyResults.find(ekr => ekr.title === kr.title);
+            // Try to match with existing KRs to keep progress/ID
+            // This is a simple matching by index if editing, or create new if new
+            let existingKr: KeyResult | undefined;
+            if (okrToEdit && okrToEdit.keyResults[index]) {
+                 // If we are editing, we try to map back to original ID if index matches
+                 // Note: This is a simplification. Real apps might track IDs in the form state.
+                 existingKr = okrToEdit.keyResults[index]; 
+            }
+
             return {
-                id: existingKr?.id || `kr-temp-${Date.now()}-${index}`,
+                id: existingKr?.id || `kr-${Date.now()}-${index}`,
                 title: kr.title,
                 progress: existingKr?.progress || 0,
             };
@@ -72,38 +90,46 @@ const OkrForm: React.FC<OkrFormProps> = ({ onSubmit, onCancel, okrToEdit, employ
     const formInputClass = "w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition";
     
     return (
-         <form onSubmit={handleSubmit} className="space-y-4">
+         <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-                <label htmlFor="okr-objective" className={formLabelClass}>Mục tiêu (Objective)</label>
+                <label htmlFor="okr-objective" className="block text-base font-bold text-white mb-2">Mục tiêu (Objective)</label>
+                <p className="text-xs text-gray-400 mb-2">Mục tiêu đầy tham vọng, định tính cần đạt được.</p>
                 <input 
                     type="text" 
                     id="okr-objective" 
                     value={objective} 
                     onChange={e => setObjective(e.target.value)} 
-                    className={formInputClass}
-                    placeholder="Ví dụ: Cải thiện trải nghiệm người dùng trên di động"
+                    className={`${formInputClass} text-lg font-semibold`}
+                    placeholder="VD: Trở thành ứng dụng quản lý hàng đầu thị trường"
                     required
                 />
             </div>
-            <div>
-                <label className={formLabelClass}>Kết quả chính (Key Results)</label>
-                <div className="space-y-2">
+            
+            <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-700">
+                <label className="block text-sm font-bold text-indigo-300 mb-3 flex items-center gap-2">
+                    <CheckBadgeIcon className="w-5 h-5"/> Kết quả chính (Key Results)
+                </label>
+                <p className="text-xs text-gray-400 mb-3">Các kết quả định lượng để đo lường việc đạt được mục tiêu.</p>
+                
+                <div className="space-y-3">
                     {keyResults.map((kr, index) => (
-                        <div key={index} className="flex items-center gap-2">
+                        <div key={index} className="flex items-start gap-2 animate-fade-in-up">
+                            <span className="text-gray-500 pt-2 text-xs font-mono">{index + 1}.</span>
                             <input 
                                 type="text"
                                 value={kr.title}
                                 onChange={e => handleKeyResultChange(index, e.target.value)}
-                                className={`${formInputClass} flex-grow`}
-                                placeholder={`Kết quả chính ${index + 1}`}
+                                className={`${formInputClass} flex-grow text-sm`}
+                                placeholder={`Kết quả chính #${index + 1}`}
                             />
                             <button 
                                 type="button" 
                                 onClick={() => removeKeyResult(index)} 
+                                title="Xóa kết quả này"
                                 disabled={keyResults.length <= 1}
-                                className="p-2 text-gray-400 hover:text-red-400 rounded-full hover:bg-gray-700/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="mt-1 p-1.5 text-gray-400 hover:text-red-400 rounded-md hover:bg-gray-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
                             >
-                                <TrashIcon className="w-5 h-5"/>
+                                <TrashIcon className="w-4 h-4"/>
                             </button>
                         </div>
                     ))}
@@ -111,15 +137,16 @@ const OkrForm: React.FC<OkrFormProps> = ({ onSubmit, onCancel, okrToEdit, employ
                 <button 
                     type="button" 
                     onClick={addKeyResult}
-                    className="mt-2 flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300 transition"
+                    className="mt-4 flex items-center gap-1 text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition px-2 py-1 rounded hover:bg-indigo-900/20"
                 >
                     <PlusIcon className="w-4 h-4" /> Thêm kết quả chính
                 </button>
             </div>
-             <div className="flex justify-end gap-3 pt-4">
+
+             <div className="flex justify-end gap-3 pt-4 border-t border-gray-700/50">
                 <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-500 transition">Hủy</button>
-                <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition">
-                    {okrToEdit ? 'Cập nhật OKR' : 'Tạo OKR'}
+                <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition font-semibold shadow-lg shadow-indigo-500/20">
+                    {okrToEdit ? 'Lưu Thay Đổi' : 'Tạo OKR'}
                 </button>
             </div>
         </form>
